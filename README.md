@@ -1,120 +1,131 @@
-🚀 ServiceHub – Local Service Booking Platform
+# 🚀 ServiceHub – Local Service Booking Platform
 
-A web-based platform designed to connect customers with local service providers (like barbers, tutors, mechanics, etc.).
-This project is my internship submission, currently in-progress.
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge\&logo=node.js\&logoColor=white)
+![Express](https://img.shields.io/badge/Express.js-000000?style=for-the-badge\&logo=express\&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge\&logo=mongodb\&logoColor=white)
+![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge\&logo=react\&logoColor=black)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge\&logo=tailwind-css\&logoColor=white)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge\&logo=cloudinary\&logoColor=white)
 
-📌 Project Overview
+> 🛠️ Internship Project | MERN Stack | Local Service Booking & Provider Management
 
-Customers can search for local providers, book appointments, and pay online.
+---
 
-Providers can set availability, manage bookings, and track payments.
+## 📚 Overview
 
-Goal: streamline appointment scheduling, avoid missed calls/messages, and improve customer experience.
+**ServiceHub** is a full-stack web platform that connects **customers** with **local service providers** (barbers, tutors, mechanics, etc.).
+It simplifies **service discovery, booking, and provider management**, reducing missed calls and scheduling conflicts.
 
-✅ Work Completed So Far
-🔹 Frontend (UI – Static for now)
+This is my **internship project submission** — the platform is currently **in-progress**, with **backend completed (core features)** and **frontend UI partially done (static for now)**.
 
-Built core pages in React:
+---
 
-Auth pages (Login / Register with OTP UI)
+## ✨ Features Implemented
 
-Provider dashboard UI (Profile setup, services)
+* ✅ **OTP-based Authentication** (Email login, JWT stored in cookies)
+* ✅ **Provider Profiles** (bio, profile image via Cloudinary, GeoJSON location)
+* ✅ **Service Management** (create, update, delete, fetch services with images)
+* ✅ **Security Middleware** (Helmet, Rate Limiting, Mongo Sanitize, XSS Clean)
+* ✅ **Responsive Static UI** (React + Tailwind) – half completed
 
-Customer browse UI (basic layout, not yet dynamic)
+---
 
-Applied responsive styling (clean and modern theme).
+## 📁 Folder Structure
 
-🔹 Backend (Node.js + Express + MongoDB)
+```bash
+servicehub/
+├── backend/
+│   ├── controllers/       # Auth, Provider, Service logic
+│   ├── models/            # User, Service, OTP schemas
+│   ├── routes/            # API routes
+│   ├── middlewares/       # Auth, Multer, Security
+│   ├── config/            # Cloudinary, DB
+│   └── server.js          # App entry point
+├── frontend/              # React static UI (in progress)
+│   ├── src/pages/         # Auth, Provider, Customer pages
+│   ├── src/components/    # UI components
+│   └── src/App.js
+└── README.md
+```
 
-Auth system (OTP-based, no password)
+---
 
-Register with email
+## 🚧 Pending / Next Steps
 
-Login with OTP
+* 🔜 **Booking System** → Customers select service + timeslot
+* 🔜 **Payments Integration** → Secure checkout with Stripe
+* 🔜 **Search & Filters** → Find providers by service & location
+* 🔜 **Ratings & Reviews** → Customers review providers
+* 🔜 **Connect Frontend to Backend** (make UI dynamic)
+* 🔜 **Deploy** → Backend on Railway, Frontend on Vercel
 
-Verify OTP → issue JWT stored in cookie
+---
 
-Provider Profile
+## 🧪 Technologies Used
 
-Bio, profile image (Cloudinary upload), GeoJSON location
+| Tech             | Purpose                                 |
+| ---------------- | --------------------------------------- |
+| **Node.js**      | Backend runtime                         |
+| **Express.js**   | REST API framework                      |
+| **MongoDB**      | Database (Mongoose ODM)                 |
+| **React.js**     | Frontend (UI, static progress)          |
+| **Tailwind CSS** | Responsive styling                      |
+| **JWT + OTP**    | Secure authentication flow              |
+| **Cloudinary**   | File storage (profile & service images) |
+| **Multer**       | File uploads                            |
+| **Helmet**       | Security headers                        |
+| **Rate Limit**   | Protect against abuse                   |
 
-Update and fetch provider profiles
+---
 
-Services
+## 🚀 How to Run Backend
 
-Providers can create, update, delete services
+```bash
+# 1. Clone the repo
+git clone https://github.com/yourusername/servicehub.git
+cd servicehub/backend
 
-Service includes title, description, price, and image (Cloudinary upload)
-
-Public routes to view services and provider’s services
-
-🔹 Security / Middleware
-
-Helmet, CORS, Cookie Parser, Express Rate Limiting
-
-Mongo sanitize + XSS clean
-
-Multer for file uploads, integrated with Cloudinary
-
-🚧 Pending / Next Steps
-
-🔜 Booking system → select service, choose time slot, confirm appointment
-
-🔜 Payments → Stripe integration for secure checkout
-
-🔜 Search & filters → search providers by service type, location “near me”
-
-🔜 Ratings & reviews → customers rate providers and leave feedback
-
-🔜 Complete dynamic frontend → connect UI with backend APIs
-
-🔜 Deployment → Backend on Railway, Frontend on Vercel
-
-🛠️ Tech Stack
-
-Frontend: React, Tailwind CSS (UI static for now)
-
-Backend: Node.js, Express.js
-
-Database: MongoDB (Mongoose ODM)
-
-Auth: JWT + OTP-based login (email OTP)
-
-File Uploads: Multer + Cloudinary
-
-Security: Helmet, CORS, Express-rate-limit, XSS-clean, Mongo-sanitize
-
-🚀 How to Run (Backend)
-
-Clone repo & install dependencies:
-
+# 2. Install dependencies
 npm install
 
-
-Add .env file with:
-
+# 3. Add environment variables (.env)
 PORT=5000
-MONGO_URI=your_mongodb_connection
-JWT_SECRET=your_secret_key
-CLOUDINARY_CLOUD_NAME=xxxx
-CLOUDINARY_API_KEY=xxxx
-CLOUDINARY_API_SECRET=xxxx
+MONGO_URI=your_mongo_uri
+JWT_SECRET=your_jwt_secret
+CLOUDINARY_CLOUD_NAME=xxx
+CLOUDINARY_API_KEY=xxx
+CLOUDINARY_API_SECRET=xxx
 
-
-Start server:
-
+# 4. Start development server
 npm run dev
+```
 
-📸 Screenshots (UI Progress)
+---
 
-(Add screenshots of your static frontend here to showcase progress)
+## 📸 Screenshots (Progress)
 
-👨‍💻 Internship Note
+*(I will add UI screenshots here – Auth page, Provider profile form, Services page)*
 
-This project is still work in progress.
+---
 
-Backend core features (auth, provider, services) are functional.
+## 🧑‍💻 Internship Note
 
-Frontend UI is half-complete and currently static.
+This project is **in progress**:
 
-Bookings, payments, and full integration will be the next milestones.
+* Backend (Auth, Provider, Services) → ✅ functional
+* Frontend (UI) → ✅ half complete, static only
+* Booking, payments, and integration → 🔜 next steps
+
+---
+
+## 🧑‍💻 Author
+
+**Walija**
+Web Developer Intern
+
+🌐 [GitHub](https://github.com/Walija-sh) • 📧 [Email](mailto:walijash@example.com)
+
+---
+
+> *ServiceHub is a modern service-booking solution — this version demonstrates authentication, provider management, and service listings as part of internship progress.*
+
