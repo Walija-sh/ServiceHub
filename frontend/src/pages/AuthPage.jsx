@@ -1,49 +1,84 @@
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { FaUser, FaPhone, FaLock, FaEnvelope } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock } from "react-icons/fa";
 import assets from "../assets/assets";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../store/slices/authSlice";
 
-const AuthPage = ({mode}) => {
- // Also support query params like /auth?mode=signup
+
+const API_URL = "http://localhost:5000/api/auth"; // adjust if deployed
+
+const AuthPage = ({ mode }) => {
   const [searchParams] = useSearchParams();
   const queryMode = searchParams.get("mode") || mode || "login";
-
   const isSignup = queryMode === "signup";
+  const dispatch = useDispatch();
+  const nav=useNavigate()
 
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const [formData, setFormData] = useState({ name: "", email: "" });
+  const [step, setStep] = useState(1); // 1 = details, 2 = OTP
+  const [otp, setOtp] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isSignup) {
-      console.log("Signing up:", formData);
-    } else {
-      console.log("Logging in:", {
-        email: formData.email,
-        password: formData.password,
-      });
+    setLoading(true);
+    setError("");
+
+    try {
+      if (step === 1) {
+        // Register or Login request
+        const endpoint = isSignup ? `${API_URL}/register` : `${API_URL}/login`;
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.message || "Something went wrong");
+
+        setStep(2); // move to OTP step
+      } else {
+        // Verify OTP
+        const res = await fetch(`${API_URL}/verify-otp`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ email: formData.email, code: otp }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          // Reset to step 1 if OTP fails
+          setStep(1);
+          throw new Error(data.message || "OTP verification failed");
+        }
+
+        // TODO: Save user in Redux
+        // after OTP verify success:
+dispatch(loginSuccess({ email: formData.email })); 
+        console.log("Login success:", data);
+        nav('/')
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-orange-50 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-md flex flex-col md:flex-row max-w-4xl w-full overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-md flex flex-col md:flex-row md:items-center max-w-4xl w-full overflow-hidden relative">
         {/* Left Side */}
-        <div className="md:w-1/2 flex flex-col justify-center items-center p-8 ">
-          <img
-            src={assets.authImg}
-            alt="auth illustration"
-            className="w-3/4"
-          />
+        <div className="md:w-1/2 flex flex-col justify-center items-center p-8">
+          <img src={assets.authImg} alt="auth illustration" className="w-3/4" />
           <h2 className="text-xl font-semibold mt-6">Join our community</h2>
           <p className="text-gray-600 text-center mt-2">
             Connect with trusted local service providers or start offering your
@@ -56,15 +91,10 @@ const AuthPage = ({mode}) => {
           <h2 className="text-2xl font-bold text-center mb-2">
             {isSignup ? "Create your account" : "Welcome back"}
           </h2>
-          <p className="text-center text-gray-500 mb-6">
-            {isSignup
-              ? "Sign up as a customer to book services."
-              : "Login to continue booking or managing your services."}
-          </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {isSignup && (
-              <>
+          {step === 1 ? (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {isSignup && (
                 <div className="relative">
                   <FaUser className="absolute top-3 left-3 text-gray-400" />
                   <input
@@ -77,115 +107,96 @@ const AuthPage = ({mode}) => {
                     required
                   />
                 </div>
+              )}
 
-                <div className="relative">
-                  <FaPhone className="absolute top-3 left-3 text-gray-400" />
-                  <input
-                    type="tel"
-                    name="phone"
-                    placeholder="Phone Number"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
-                    required
-                  />
-                </div>
-              </>
-            )}
-
-            <div className="relative">
-              <FaEnvelope className="absolute top-3 left-3 text-gray-400" />
-              <input
-                type="email"
-                name="email"
-                placeholder="Email Address"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
-                required
-              />
-            </div>
-
-            <div className="relative">
-              <FaLock className="absolute top-3 left-3 text-gray-400" />
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
-                required
-              />
-            </div>
-
-            {isSignup && (
               <div className="relative">
-                <FaLock className="absolute top-3 left-3 text-gray-400" />
+                <FaEnvelope className="absolute top-3 left-3 text-gray-400" />
                 <input
-                  type="password"
-                  name="confirmPassword"
-                  placeholder="Confirm Password"
-                  value={formData.confirmPassword}
+                  type="email"
+                  name="email"
+                  placeholder="Email Address"
+                  value={formData.email}
                   onChange={handleChange}
                   className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
                   required
                 />
               </div>
-            )}
 
-            {isSignup && (
-              <div className="flex items-center">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-semibold transition disabled:opacity-50"
+              >
+                {loading
+                  ? "Sending..."
+                  : isSignup
+                  ? "Send OTP & Register"
+                  : "Send OTP"}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="relative">
+                <FaLock className="absolute top-3 left-3 text-gray-400" />
                 <input
-                  type="checkbox"
-                  id="terms"
+                  type="text"
+                  name="otp"
+                  placeholder="Enter OTP"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  className="w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-orange-400 outline-none"
                   required
-                  className="mr-2 accent-orange-500"
                 />
-                <label htmlFor="terms" className="text-sm text-gray-600">
-                  I agree to the{" "}
-                  <a href="/terms" className="text-orange-500 underline">
-                    Terms & Privacy Policy
-                  </a>
-                </label>
               </div>
-            )}
 
-            <button
-              type="submit"
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-semibold transition"
-            >
-              {isSignup ? "Create Account" : "Login"}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg font-semibold transition disabled:opacity-50"
+              >
+                {loading ? "Verifying..." : "Verify OTP"}
+              </button>
+            </form>
+          )}
 
-          <div className="text-center mt-4 text-sm">
+          {/* Switch between login/signup */}
+          <p className="text-center mt-4 text-sm">
             {isSignup ? (
-              <p>
+              <>
                 Already have an account?{" "}
-                <a
-                  href="/auth?mode=login"
-                  className="text-orange-500 font-medium"
-                >
+                <Link to="/auth?mode=login" className="text-orange-500 font-medium">
                   Login
-                </a>
-              </p>
+                </Link>
+              </>
             ) : (
-              <p>
+              <>
                 Don’t have an account?{" "}
-                <a
-                  href="/auth?mode=signup"
-                  className="text-orange-500 font-medium"
-                >
+                <Link to="/auth?mode=signup" className="text-orange-500 font-medium">
                   Sign up
-                </a>
-              </p>
+                </Link>
+              </>
             )}
-          </div>
+          </p>
         </div>
+
+        {/* Error Modal */}
+        {error && (
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-sm w-full">
+              <h3 className="text-lg font-bold text-red-600 mb-2">Error</h3>
+              <p className="text-gray-700 mb-4">{error}</p>
+              <button
+                onClick={() => setError("")}
+                className="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
-}
+};
 
-export default AuthPage
+export default AuthPage;

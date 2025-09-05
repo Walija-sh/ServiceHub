@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { FaLocationDot } from "react-icons/fa6";
 import { NavLink, Link } from 'react-router-dom';
 import { IoChevronDown } from "react-icons/io5";
+import { logout } from "../store/slices/authSlice";
+import { useDispatch, useSelector } from 'react-redux';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+   const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
-  // Placeholder auth state
-  const isAuthenticated = false;
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -109,7 +111,7 @@ const Navbar = () => {
               }>
                 My Account
               </NavLink>
-              <button className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors">
+              <button onClick={() => dispatch(logout())} className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg hover:bg-red-600 transition-colors">
                 Sign Out
               </button>
             </div>
